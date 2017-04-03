@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name=viewport content="user-scalable=no,width=device-width" />
+
+    <link rel="stylesheet" href="css/themes/holo.min.css" />
+    <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script>
+        $(document).bind('mobileinit', function() {
+            $.mobile.changePage.defaults.changeHash = false;
+            $.mobile.hashListeningEnabled = false;
+            $.mobile.pushStateEnabled = false;
+        });
+    </script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script src="js/index.js"></script>
+
+</head>
+
+<body>
+
+    <div data-role=page id=home data-theme="a">
+        <!-- HEADER -->
+        <div data-role="header" data-theme="a" class="header">
+            <h1 style="color:#FFF; text-shadow:none;">Shade Lighting</h1>
+            <a href="#nav-panel" data-icon="bars" data-iconpos="notext" class="ui-alt-icon ui-nodisc-icon">Menu</a>
+
+        </div>
+        <div id="tabs" data-role="control-group" data-theme="a">
+            <fieldset class="ui-grid-a" data-theme="b">
+                <div class="ui-block-a">
+                    <button style="margin:0px; border:0" data-corners="false" class="custom-nav" name="adaptive" id="adaptive">Adaptive</button>
+                </div>
+                <div class="ui-block-b">
+                    <button style="margin:0px; border:0" data-corners="false" class="custom-nav" name="suncycle" id="suncycle">Sun Cycle</button>
+                </div>
+            </fieldset>
+            <HR style="margin:0">
+        </div>
+        <!-- /header -->
+        <!-- PANEL -->
+        <div data-role="panel" data-position="left" data-position-fixed="false" data-display="overlay" id="nav-panel" data-theme="b">
+            <ul data-role="listview" data-theme="a" style="margin-top:-16px;" class="nav-search">
+                <div data-role="header" data-theme="a">
+                    <h1>Configuration</h1>
+                    <a href="#" data-iconpos="notext" data-icon="arrow-l" data-rel="close">Close Menu</a>
+                </div>
+                <li>
+                    <a id="deviceConfig" href="#" style="text-align: left" data-iconshadow="true" data-icon="gear" data-role="button" data-corners="false" data-rel="close">
+                        <h3 class="ui-li-heading">Device Pairing</h3>
+                        <p class="ui-li-desc">Pair your app, scheduler, and hub</p>
+                    </a>
+                </li>
+                <li>
+                    <a id="bulbSelect" href="#" style="text-align: left" data-iconshadow="true" data-icon="gear" data-role="button" data-corners="false" data-rel="close">
+                        <h3 class="ui-li-heading">Bulb Selection</h3>
+                        <p class="ui-li-desc">Choose bulbs for auto-scheduling</p>
+                    </a>
+                </li>
+				<li>
+                    <a id="checkUpdate" href="#" style="text-align: left" data-iconshadow="true" data-icon="refresh" data-role="button" data-corners="false" data-rel="close">
+                        <h3 class="ui-li-heading">Server Update</h3>
+                        <p class="ui-li-desc">Check for server updates</p>
+                    </a>
+                </li>
+                <li>
+                    <a id="clearData" href="#" style="text-align: left" data-iconshadow="true" data-icon="delete" data-icon="gear" data-role="button" data-corners="false" data-rel="close">
+                        <h3 class="ui-li-heading">Erase Scheduling Data</h3>
+                        <p class="ui-li-desc">Clear all configuration data</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- /panel -->
+        <div data-role="content" style="margin:0px; padding:0px;">
+
+            <form id="lightSubmit" name="lightSubmit" method="post" action="http://frogfuse.com/lights/setupReceive.php">
+                <input type="hidden" name="configData" id="configData" value="">
+            </form>
+            <div id="lightList" style="margin:-1px; overflow: hidden;"></div>
+            <div id="bridgeList" style="margin:-1px; overflow: hidden;"></div>
+            <div id="waiting" style="display: block; position:fixed; z-index:1000; top:0; left:0; height:100%; width:100%;
+				background: rgba( 255, 255, 255, .8 ) 
+				url('./img/ajax_loader.gif') 
+                50% 50% 
+                no-repeat;">
+
+            </div>
+
+            <div id="sunSettings">
+                <ul id="sun" data-role="listview" style="align: 0 auto; margin: -1px; padding:0" data-inset="true" data-corners="false">
+                    <li>
+                        <div class="ui-grid-a">
+                            <div class="ui-block-a" style="width:65%; margin: 2% auto 2% auto">
+                                <label for="suncycleFlipper">
+                                    <h1>Blue Light Filtering</h1>
+                                    <p class="ui-li-desc">An automated schedule that mimics the sun.</p>
+                                </label>
+                            </div>
+                            <div class="ui-block-b" style="width:35%; margin: 2% auto 2% auto" align="right">
+                                <select name="pauseSun" id="pauseSun" data-role="flipswitch">
+                                    <option value="0">Off</option>
+                                    <option value="1">On</option>
+                                </select>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ui-grid-a" style="margin: 2% auto 2% auto">
+                            <div data-role="rangeslider" class="custom-nav">
+                                <label for="sunrise">
+                                    <h1>Sunrise/Sunset (24-hour clock):</h1></label>
+                                <BR>
+                                <input name="sunrise" id="sunrise" min="0" max="23.5" value="0" type="range" step=".5" />
+                                <label for="sunset">Sunrise/Sunset (24-hour clock)</label>
+                                <input name="sunset" id="sunset" min="0" max="23.5" value="23.5" type="range" step=".5" />
+                            </div>
+
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ui-grid-a" style="margin: 2% auto 2% auto">
+                            <div data-role="rangeslider" class="custom-nav">
+                                <label for="dimLow">
+                                    <h1>Min/Max Brightness (%):</h1></label>
+                                <BR>
+                                <input name="dimLow" id="dimLow" min="0" max="100" value="0" type="range" step="5" />
+                                <label for="dimHigh">Sunrise/Sunset Dimming (%):</label>
+                                <input name="dimHigh" id="dimHigh" min="0" max="100" value="100" type="range" step="5" />
+                            </div>
+
+                        </div>
+                    </li>					
+                    <li>
+                        <div class="ui-grid-a" style="margin: 2% auto 2% auto">
+                            <div data-role="rangeslider" class="colorsp custom-nav" data-highlight="false">
+                                <label for="minTemp">
+                                    <h1>Min/Max Color Temp (K):</h1></label>
+                                <BR>
+                                <input name="minTemp" id="minTemp" min="1000" max="6500" value="0" type="range" step="100" />
+                                <label for="maxTemp">Minimum/Maximum Color Temp (K):</label>
+                                <input name="maxTemp" id="maxTemp" min="1000" max="6500" value="6500" type="range" step="100" />
+                            </div>
+
+                        </div>
+                    </li>
+                </ul>
+                <BR>
+                <BR>
+            </div>
+            <div id="adaptiveSettings">
+                <ul id="settings" data-role="listview" style="align: 0 auto; margin: -1px; padding:0" data-inset="true" data-corners="false">
+                    <li>
+                        <div class="ui-block-a" style="width:65%; margin: 2% auto 2% auto">
+                            <label for="scheduleFlipper">
+                                <h1>Scheduler</h1>
+                                <p class="ui-li-desc">Learns your preferred light scenes.</p>
+                            </label>
+                        </div>
+                        <div class="ui-block-b" style="width:35%; margin: 2% auto 2% auto" align="right">
+                            <select name="pauseSchedule" id="pauseSchedule" data-role="flipswitch">
+                                <option value="1">Off</option>
+                                <option value="0">On</option>
+                            </select>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ui-block-a" style="width:65%; margin: 2% auto 2% auto">
+                            <label for="monitorFlipper">
+                                <h1>Monitor</h1>
+                                <p class="ui-li-desc">Changes affect future schedules.</p>
+                            </label>
+                        </div>
+                        <div class="ui-block-b" style="width:35%; margin: 2% auto 2% auto" align="right">
+                            <select name="pauseMonitor" id="pauseMonitor" data-role="flipswitch">
+                                <option value="1">Off</option>
+                                <option value="0">On</option>
+                            </select>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ui-grid-a" style="margin: 0% auto 4% auto">
+                            <label for="transBar">
+                                <h3>Transition Length (in seconds)    <a href="#" id="transInfo" class="ui-nodisc-icon ui-alt-icon ui-btn ui-corner-all ui-icon-info ui-btn-icon-notext ui-btn-inline"></a></h3>
+                            </label>
+                            <div data-role="slider" class="custom-nav">
+                                <input type="range" name="tranSpeed" id="tranSpeed" value="30" min="0" max="65" data-highlight="true">
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ui-grid-a" style="margin: 0% auto 4% auto">
+                            <label for="timeoutBar">
+                                <h3>Timeout Period (in minutes)    <a href="#" id="timeoutInfo" class="ui-nodisc-icon ui-alt-icon ui-btn ui-corner-all ui-icon-info ui-btn-icon-notext ui-btn-inline"></a></h3>
+                            </label>
+                            <div data-role="slider" class="custom-nav">
+                                <input type="range" name="timeout" id="timeout" value="60" min="0" max="180" data-highlight="true">
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <BR>
+                <BR>
+            </div>
+        </div>
+    </div>
+    <div class="modal">
+        <!-- Place at bottom of page -->
+    </div>
+
+</body>
+
+</html>
